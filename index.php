@@ -31,17 +31,17 @@ $(function(){
 				url: "curl_test.php",
 				cache: false,
 				data: {url: decodeURIComponent(test_data[$(this).closest(".output").attr("id")][$(this).attr("data-urlkey")])},
-				success: function(data, status, code){},
-				error: function(data){$(".test_status", this_test).html("Error"); $(".test_details", this_test).html("<span class='error'>ajax call failed</span>");},
-				complete: function(data, status, code){$(".test_status", this_test).html(status); $(".test_details", this_test).html(code); if(!$(".pending", this_test.closest(".output")).length){this_start.html("completed (click to rerun)");}}
-			});
+			})
+			.done(function(data){})
+			.fail(function(data){$(".test_status", this_test).html("Error"); $(".test_details", this_test).html("<span class='error'>ajax call failed</span>");})
+			.always(function(data){$(".test_status", this_test).html(data); $(".test_details", this_test).remove(); if(!$(".pending", this_test.closest(".output")).length){this_start.html("completed (click to rerun)");}});
 		});
 	});
 	
 	$(".output").each(function(){
 		$output = $(this);
 		$.each(test_data[$(this).attr("id")], function(k,v){
-			$('<div/>', {class: 'test', attr: {'data-urlkey': k}, html: "(" + (k+1) + ") <span class='test_status'>Queued</span>: <span class='test_details'>" + decodeURIComponent(v) + "</span>"}).appendTo($output);
+			$('<div/>', {class: 'test', attr: {'data-urlkey': k}, html: "(" + (k+1) + ") <span class='test_status'>Queued:</span><span class='test_details'> " + decodeURIComponent(v) + "</span>"}).appendTo($output);
 		});
 		
 		$output.append("<div class='start'>START</div>");

@@ -15,31 +15,8 @@
 <body>
 <script>
 
-var test_data = {test_batch1: [
-<?php
-//done in php because javascript escapes backslash
-$test_urls = array(
-"http://www.freshed.com",
-"http://www.mutualfundinvestorguide.com",
-"http://www.stonemountainhomebuilders.com"
-);
-echo implode(",", array_map(function($v){return '"' . urlencode($v) . '"';}, $test_urls));
-?>
-],
-test_batch2: [
-<?php
-//done in php because javascript escapes backslash
-$test_urls = array(
-"http://www.freshed.com",
-"http://www.westernmassland.com",
-"http://www.greylockrealty.com",
-"http://www.isgoodrealty.com",
-"http://www.redhorserealestate.com"
-);
-echo implode(",", array_map(function($v){return '"' . urlencode($v) . '"';}, $test_urls));
-?>
-]
-};
+var test_data = {test_batch1: ["http://www.freshed.com", "http://www.mutualfundinvestorguide.com", "http://www.stonemountainhomebuilders.com"],
+test_batch2: ["http://www.freshed.com", "http://www.westernmassland.com", "http://www.greylockrealty.com", "http://www.isgoodrealty.com", "http://www.redhorserealestate.com"]};
 
 $(function(){
 	$(document).on("click", ".start", function(){
@@ -50,18 +27,19 @@ $(function(){
 			$.ajax({
 				beforeSend: function(){$(".test_status", this_test).html("<span class='pending'>pending...</span>"); },
 				type: "GET",
+				timeout: 10000,
 				url: "curl_test.php",
 				cache: false,
-				data: {url: test_data[$(this).closest(".output").attr("id")][$(this).attr("data-urlkey")]},
-				success: function(data){$(".test_status", this_test).html("Completed"); $(".test_details", this_test).html(data);},
-				error: function(data){$(".test_status", this_test).html("Error"); $(".test_details", this_test).html("<span class='error'>ajax call failed</span>");}
+				data: {url: decodeURIComponent(test_data[$(this).closest(".output").attr("id")][$(this).attr("data-urlkey")])},
+				success: function(data, status, code){},
+				error: function(data){$(".test_status", this_test).html("Error"); $(".test_details", this_test).html("<span class='error'>ajax call failed</span>");},
+				complete: function(data, status, code){$(".test_status", this_test).html(status); $(".test_details", this_test).html(code); if(!$(".pending", this_test.closest(".output")).length){this_start.html("completed (click to rerun)");}}
 			});
 		});
 	});
 	
 	$(".output").each(function(){
 		$output = $(this);
-		console.log(test_data[$(this).attr("id")]);
 		$.each(test_data[$(this).attr("id")], function(k,v){
 			$('<div/>', {class: 'test', attr: {'data-urlkey': k}, html: "(" + (k+1) + ") <span class='test_status'>Queued</span>: <span class='test_details'>" + decodeURIComponent(v) + "</span>"}).appendTo($output);
 		});
